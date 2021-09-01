@@ -36,12 +36,12 @@ class Post():
                 del data["_id"]
                 return data
 
-    @staticmethod
-    def update(post_id: int, data: dict):
-        post_keys = ["title", "author", "content", "tags"]
+    @classmethod
+    def update(cls,post_id: int, data: dict):
+        
         try:
 
-            update_keys = [item for item in data.keys() if item in post_keys]
+            update_keys = [item for item in data.keys() if item in cls.post_keys]
             if len(update_keys) == 0:
                 raise KeyError
 
@@ -49,15 +49,15 @@ class Post():
             update_info["updated_at"] = datetime.utcnow()
             update = {"$set": update_info}
             
-            acknowledge = db.posts.update_one({"id": post_id}, update).acknowledged
+            result = db.posts.update_one({"id": post_id}, update)
 
-            if acknowledge:
-                post = list(db.posts.find({"id": post_id}))[0]
+            if bool(result.acknowledged and result.modified_count):
+                post = db.posts.find_one({"id": post_id})
                 del post["_id"]
 
                 return post
         
-        except IndexError:
+        except TypeError:
             return False
 
     @staticmethod
@@ -72,26 +72,26 @@ class Post():
     def read_specifc_post(post_id: int):
 
         try:
-            post = list(db.posts.find({"id": post_id}))[0]
+            post = db.posts.find_one({"id": post_id})
             del post["_id"]
         
             return post
         
-        except IndexError:
+        except TypeError:
             
             return False
 
     @staticmethod
     def delete_post(post_id: int):
         try:
-            deleted_post = list(db.posts.find({"id": post_id}))[0]
+            deleted_post = db.posts.find_one({"id": post_id})
             del deleted_post["_id"]
         
-        except IndexError:
+        except TypeError:
             return False
         
         finally:     
-            delete_count = db.posts.delete_one({"id": post_id}).deleted_count
+            result = db.posts.delete_one({"id": post_id})
         
-            if delete_count == 1:
+            if bool(result.acknowledged and result.deleted_count):
                 return deleted_post
