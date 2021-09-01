@@ -18,6 +18,8 @@
     - [ ]  Retorna status code 406 caso o JSON enviado não seja válido
     - [ ]  Tentativa de editar post inexistente retorna 404
     - [ ]  Retorna o objeto atualizado e status code 200 em caso de sucesso na atualização
+_____
+### Design Pattern
 - MongoDB
     - [ ]  Conexão com o banco seguindo boas práticas e uso correto das  funções disponibilizadas pelo Pymongo
 - POO
