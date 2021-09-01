@@ -1,3 +1,4 @@
+from app.models.posts_error_model import PostsKeysError
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
@@ -12,12 +13,14 @@ db.posts
 
 class Post():
     post_keys = ["title", "author", "content", "tags"]
-    def __init__(self, title: str, author: str, content: str, tags: list) -> None:
-            self.title: str = title
-            self.author: str = author
-            self.content: str = content
-            self.tags: list = tags
-
+    def __init__(self, data: dict) -> None:
+        try:
+            self.title: str = data['title']
+            self.author: str = data['author']
+            self.content: str = data['content']
+            self.tags: list = data['tags']
+        except KeyError:
+            raise PostsKeysError(**data)
 
     def create(self):
         data = self.__dict__
@@ -43,7 +46,8 @@ class Post():
 
             update_keys = [item for item in data.keys() if item in cls.post_keys]
             if len(update_keys) == 0:
-                raise KeyError
+                raise PostsKeysError(**data)
+                
 
             update_info = dict(zip(update_keys, data.values()))
             update_info["updated_at"] = datetime.utcnow()

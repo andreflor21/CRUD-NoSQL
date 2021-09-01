@@ -1,4 +1,5 @@
 
+from app.models.posts_error_model import PostsKeysError
 from flask import Flask, request, jsonify
 from pymongo import response
 
@@ -12,12 +13,12 @@ def init_app(app: Flask):
     def create_post():
         data = request.json
         try:
-            post = Post(title=data["title"], author=data["author"], content=data["content"], tags=data["tags"])
+            post = Post(data)
             response =  post.create()
             if response:
                 return {"data": response}, 201
-        except KeyError as err:
-            return {"error": "Wrong keys inserted"}, 406
+        except PostsKeysError as err:
+            return {"error": err.message}, 406
         
 
     @app.get("/posts")
@@ -55,5 +56,5 @@ def init_app(app: Flask):
         
             return {"error": "Post not found"}, 404
             
-        except KeyError:
-            return {"error": "Wrong keys inserted"}, 406
+        except PostsKeysError as err:
+            return {"error": err.message}, 406
